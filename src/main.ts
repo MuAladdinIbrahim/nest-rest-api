@@ -6,8 +6,7 @@ async function bootstrap() {
   const logger = new Logger();
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  const port = 3000;
-  await app.listen(port);
-  logger.log(`Application is up and running on ${port}`);
+  await app.listen(process.env.PORT);
+  logger.log(`Application is up and running on ${process.env.PORT}`);
 }
 bootstrap();
