@@ -1,9 +1,12 @@
+import { NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { TaskStatus } from './task-status.enum';
 import { TasksRepository } from './tasks.repositroy';
 import { TasksService } from './tasks.service';
 
 const mockTasksRepository = () => ({
   getTasks: jest.fn(),
+  findOne: jest.fn(),
 });
 
 describe('TasksService', () => {
@@ -28,6 +31,28 @@ describe('TasksService', () => {
       const result = await tasksService.getTasks({});
       expect(tasksRepository.getTasks).toHaveBeenCalled();
       expect(result).toEqual('value');
+    });
+  });
+
+  describe('getTaskById', () => {
+    it('calls TasksRepository.findOne and returns the result', async () => {
+      const mockTask = {
+        title: 'title',
+        description: 'description',
+        id: 'id',
+        status: TaskStatus.OPEN,
+      };
+      expect(tasksRepository.findOne).not.toHaveBeenCalled();
+      tasksRepository.findOne.mockResolvedValue(mockTask);
+      const result = await tasksService.getTaskById(mockTask.id);
+      expect(tasksRepository.findOne).toHaveBeenCalled();
+      expect(result.title).toEqual('title');
+      expect(result.description).toEqual('description');
+    });
+
+    it('calls TasksRepository.findOne and handles an error', async () => {
+      tasksRepository.findOne.mockResolvedValue(null);
+      expect(tasksService.getTaskById('id')).rejects.toThrow(NotFoundException);
     });
   });
 });
